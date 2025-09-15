@@ -82,9 +82,10 @@ npm start
 4. Dockerization: Containerize the application using Docker for a more seamless and portable deployment experience.
 
 ---
-### 🤝 Contact
-For suggestions or collaboration opportunities, feel free to reach out:
 
-Email: mudimalayeshwanthgoud@gmail.com
+## 📬 Contact
+For any questions or collaboration, feel free to reach out:
 
+Email: yeshwanth.mudimala@motivitylabs.com
 
+---
