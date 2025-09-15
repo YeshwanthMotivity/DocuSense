@@ -87,6 +87,16 @@ npm start
 
 ---
 
+## 🙋‍♂️ Author
+
+• Mentor / Manager: Mr. Venkata Ramana Sudhakar Polavarapu
+
+• Mudimala Yeshwanth Goud
+
+ 🛠️ Passionate about AI/ML, NLP, RAG, Data Science, system programming, full-stack development, and intelligent assistant systems.
+
+---
+
 ## 📬 Contact
 For any questions or collaboration, feel free to reach out:
 
