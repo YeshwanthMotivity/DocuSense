@@ -5,9 +5,13 @@ DocuSense is an intelligent document question-answering system that allows users
 
 ### 🚀 Features
 • **Intelligent PDF Reading**: Upload PDF documents to enable an intelligent Q&A session.
+
 • **Semantic Search**: Utilizes SentenceTransformers and FAISS for fast and accurate semantic search.
+
 • **AI-Generated Answers**: Employs Hugging Face Transformers to provide context-aware answers derived directly from the document.
+
 • **Interactive UI**: A clean, responsive Q&A interface is built with React.js.
+
 • **Scalable Backend**: The Flask backend handles all the logic for embeddings, search, and LLM responses, and is easily extendable for cloud deployment.
 
 ---
