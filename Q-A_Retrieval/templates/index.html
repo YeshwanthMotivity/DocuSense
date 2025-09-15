@@ -1,0 +1,27 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EasyContext QA</title>
+</head>
+<body>
+    <h1>Ask a Question from Your Document</h1>
+    <form method="post" enctype="multipart/form-data">
+        <p>Upload a text file:</p>
+        <input type="file" name="file" required>
+        <p>Enter your question:</p>
+        <input type="text" name="question" required>
+        <br><br>
+        <input type="submit" value="Ask">
+    </form>
+
+    {% if answer %}
+        <h2>Answer:</h2>
+        <p>{{ answer }}</p>
+        <h3>Prompt Used:</h3>
+        <pre>{{ prompt }}</pre>
+        <h3>Raw Output (Debug):</h3>
+        <pre>{{ debug_info }}</pre>
+    {% endif %}
+</body>
+</html>

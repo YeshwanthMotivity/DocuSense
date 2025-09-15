@@ -1,0 +1,13 @@
+accelerate==0.28.0
+datasets==2.18.0
+evaluate==0.4.1
+tqdm
+einops
+sentencepiece
+scikit-learn
+matplotlib
+pandas
+numpy
+transformers==4.39.1
+seaborn
+sentence-transformers
