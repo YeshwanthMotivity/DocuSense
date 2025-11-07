@@ -1,7 +1,7 @@
 # easycontext_cpu/utils.py
 
 import os
-from typing import Optional
+import functools
 from transformers import AutoTokenizer
 
 def load_file(filepath: str) -> str:
@@ -12,10 +12,14 @@ def load_file(filepath: str) -> str:
     with open(filepath, 'r', encoding='utf-8') as f:
         return f.read()
 
+@functools.lru_cache(maxsize=None)
+def _get_tokenizer(tokenizer_name: str):
+    """Internal function to load and cache tokenizer."""
+    return AutoTokenizer.from_pretrained(tokenizer_name, use_fast=True)
 
 def count_tokens(text: str, tokenizer_name: str = "gpt2") -> int:
     """Count the number of tokens using a tokenizer."""
-    tokenizer = AutoTokenizer.from_pretrained(tokenizer_name, use_fast=True)
+    tokenizer = _get_tokenizer(tokenizer_name)
     return len(tokenizer.encode(text))
 
 
