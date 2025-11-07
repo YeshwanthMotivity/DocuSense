@@ -1,15 +1,14 @@
-# rerank.py
-
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-def rerank_chunks(chunks, query, top_k=5):
+def rerank_chunks(chunks, query, tfidf_vectorizer, top_k=5):
     """
     Re-ranks text chunks based on cosine similarity with the query.
     
     Args:
         chunks (list of str): The list of text chunks.
         query (str): The user's input query.
+        tfidf_vectorizer: An already fitted `TfidfVectorizer` object.
         top_k (int): Number of top chunks to return.
 
     Returns:
@@ -18,14 +17,12 @@ def rerank_chunks(chunks, query, top_k=5):
     if not chunks:
         return []
 
-    # Combine query and chunks into a single list for vectorization
-    documents = [query] + chunks
-
-    # Vectorize using TF-IDF
-    vectorizer = TfidfVectorizer().fit_transform(documents)
+    # Transform query and chunks using the pre-fitted vectorizer
+    query_vector = tfidf_vectorizer.transform([query])
+    chunk_vectors = tfidf_vectorizer.transform(chunks)
     
-    # Compute cosine similarities (query vector is index 0)
-    similarities = cosine_similarity(vectorizer[0:1], vectorizer[1:]).flatten()
+    # Compute cosine similarities
+    similarities = cosine_similarity(query_vector, chunk_vectors).flatten()
 
     # Sort chunk indices by similarity score
     top_indices = similarities.argsort()[::-1][:top_k]
