@@ -1,116 +1,88 @@
-# from easycontext_cpu.chunk import chunk_text
-# from easycontext_cpu.generate import generate_answer
-# from easycontext_cpu.rerank import rerank
-# from easycontext_cpu.utils import load_file
+import os
+import time
+import logging
 
-# if __name__ == "__main__":
-#     print("⚙️ Running 1M Token Codebase Analyst on CPU...")
-
-#     # Step 1: Load sample file
-#     try:
-#         text = load_file(r'C:\Yash\1M-Token Codebase Analyst\EasyContext\PaulGrahamEssays\aord.txt')
-#     except FileNotFoundError:
-#         print("❌ File not found! Make sure 'gap.txt' exists at the given path.")
-#         exit()
-
-#     # Step 2: Chunk the text
-#     chunks = chunk_text(text)
-
-#     # Step 3: Rerank using keyword
-#     reranked = rerank("startup", chunks)
-
-#     # Step 4: Pick top chunk
-#     top_chunk = reranked[0][0]
-
-#     # Step 5: Generate a dummy response
-#     response = generate_answer(top_chunk)
-
-#     print("✅ Response Generated:\n", response)
-
-# import os
-# from easycontext_cpu.utils import load_file
-# from easycontext_cpu.chunk import chunk_text
-# from easycontext_cpu.retrieve_chunks import get_top_k_chunks
-# from easycontext_cpu.rerank import rerank_chunks
-# from easycontext_cpu.infer_model import generate_answer, clean_answer
-
-# print("⚙️ Running 1M Token Codebase Analyst on CPU...")
-
-# # # STEP 1: Load the essay or codebase input (modify path as needed)
-# # filepath = os.path.join("EasyContext", "PaulGrahamEssays", "apple.txt")  # ✅ Make sure this file exists
-# # text = load_file(filepath)
-# # STEP 1: Load the essay or codebase input (modify path as needed)
-# filepath = os.path.join("EasyContext", "PaulGrahamEssays", "apple.txt")  # ✅ Make sure this file exists
-# try:
-#     text = load_file(filepath)
-# except FileNotFoundError:
-#     print(f"❌ File not found! Make sure '{filepath}' exists.")
-#     exit()
-    
-
-
-
-
-# # STEP 2: Chunk the input text
-# chunks = chunk_text(text, max_tokens=512, concat_chunks=True, concat_factor=2)
-
-# # STEP 3: Simulate a user query
-# query = "Explain the key developer concerns raised about the Apple App Store."
-# print(f"\n🔍 Query: {query}\n")
-
-# # STEP 4: Retrieve top-k relevant chunks
-# top_chunks = get_top_k_chunks(query, chunks, k=5)
-
-# # STEP 5: Rerank chunks
-# reranked_chunks = rerank_chunks(top_chunks, query)
-
-# # STEP 6: Generate answer using reranked chunks (with verbose debug output)
-# answer, prompt, raw_output = generate_answer(query, reranked_chunks, return_debug=True)
-
-# # STEP 7: Clean the generated answer
-# answer_cleaned = clean_answer(answer)
-
-# # Debug Info
-# print("\n--- Prompt Sent to Model ---\n")
-# print(prompt)
-
-# print("\n--- Raw Model Output ---\n")
-# print(raw_output)
-
-# # Final Result
-# print("\n✅ Final Response Extracted:\n")
-# print(answer_cleaned)
-
-
-# main.py
-import os, time
-from easycontext_cpu.utils           import load_file
-from easycontext_cpu.chunk           import chunk_text
+from easycontext_cpu.utils import load_file
+from easycontext_cpu.chunk import chunk_text
 from easycontext_cpu.retrieve_chunks import get_top_k_chunks
-from easycontext_cpu.rerank          import rerank_chunks
-from easycontext_cpu.infer_model     import generate_answer
+from easycontext_cpu.rerank import rerank_chunks
+from easycontext_cpu.infer_model import generate_answer
 
-print("⚙️ 1M-Token Codebase Analyst (CPU mode)")
+# --- Configuration ---
+# Parameters for the analysis workflow, externalized into a dictionary.
+# In a larger application, this could be loaded from a .env, YAML, or JSON file.
+CONFIG = {
+    "FILEPATH": os.path.join("EasyContext", "PaulGrahamEssays", "apple.txt"),
+    "CHUNK_MAX_TOKENS": 512,
+    "CHUNK_CONCAT_CHUNKS": True,
+    "CHUNK_CONCAT_FACTOR": 2,
+    "RETRIEVE_K": 6,
+    "RERANK_TOP_K": 3,
+    "QUERY": "Explain the key developer concerns raised about the Apple App Store."
+}
 
-# 1) load sample document
-FILEPATH = os.path.join("EasyContext", "PaulGrahamEssays", "apple.txt")
-text     = load_file(FILEPATH)
+# --- Logging Setup ---
+# Configure basic logging for better output control.
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
-# 2) chunk & (optionally) concatenate for longer context
-chunks = chunk_text(text, max_tokens=512, concat_chunks=True, concat_factor=2)
+def run_analysis(config: dict):
+    """
+    Executes the 1M Token Codebase Analyst workflow based on the provided configuration.
 
-# 3) user query
-query = "Explain the key developer concerns raised about the Apple App Store."
-print("🔍  Query:", query)
+    Args:
+        config (dict): A dictionary containing all necessary configuration parameters
+                       for file loading, chunking, retrieval, reranking, and query.
+    """
+    logger.info("⚙️ Starting 1M-Token Codebase Analyst (CPU mode)")
 
-# 4) retrieve + rerank
-top_chunks  = get_top_k_chunks(query, chunks, k=6)
-reranked    = rerank_chunks(top_chunks, query, top_k=3)
+    filepath = config["FILEPATH"]
+    query = config["QUERY"]
 
-# 5) answer
-answer, prompt, raw, elapsed = generate_answer(query, reranked, return_debug=True)
+    # 1) Load sample document
+    try:
+        text = load_file(filepath)
+        logger.info(f"Loaded file successfully: {filepath}")
+    except FileNotFoundError:
+        logger.error(f"❌ File not found! Ensure '{filepath}' exists at the specified path.")
+        return # Exit the function if the file cannot be found
 
-print("\n--- prompt ---------------------------------\n", prompt[:400], "...\n")
-print("--- raw model output (truncated) -----------\n", raw[:400], "...\n")
-print("⏱️  generation time:", round(elapsed, 2), "s")
-print("\n✅  FINAL ANSWER:\n", answer)
+    # 2) Chunk and (optionally) concatenate for longer context
+    chunks = chunk_text(
+        text,
+        max_tokens=config["CHUNK_MAX_TOKENS"],
+        concat_chunks=config["CHUNK_CONCAT_CHUNKS"],
+        concat_factor=config["CHUNK_CONCAT_FACTOR"]
+    )
+    logger.info(f"Text chunked into {len(chunks)} segments.")
+
+    # 3) User query
+    logger.info(f"🔍 User Query: {query}")
+
+    # 4) Retrieve + Rerank relevant chunks
+    top_chunks = get_top_k_chunks(query, chunks, k=config["RETRIEVE_K"])
+    logger.info(f"Retrieved {len(top_chunks)} top chunks based on similarity.")
+
+    reranked_chunks = rerank_chunks(top_chunks, query, top_k=config["RERANK_TOP_K"])
+    logger.info(f"Reranked to select top {len(reranked_chunks)} chunks for answer generation.")
+
+    # 5) Generate answer
+    logger.info("Starting answer generation...")
+    answer, prompt, raw_output, elapsed_time = generate_answer(query, reranked_chunks, return_debug=True)
+
+    logger.info(f"\n--- Prompt Sent to Model (truncated) ---")
+    logger.info(f"{prompt[:400]}...")
+    logger.info(f"\n--- Raw Model Output (truncated) ---")
+    logger.info(f"{raw_output[:400]}...")
+    logger.info(f"\n⏱️ Generation time: {round(elapsed_time, 2)} seconds")
+    logger.info(f"\n✅ FINAL ANSWER:\n{answer}")
+
+def main():
+    """
+    Main entry point for the 1M-Token Codebase Analyst application.
+    Orchestrates the analysis by calling run_analysis with the predefined CONFIG.
+    """
+    run_analysis(CONFIG)
+
+if __name__ == "__main__":
+    main()
