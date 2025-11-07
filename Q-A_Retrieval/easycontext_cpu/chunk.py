@@ -1,88 +1,57 @@
-# utils/chunk_codebase.py
-
-from transformers import AutoTokenizer
 from typing import List
+from transformers import PreTrainedTokenizer
 
-# def chunk_text(text: str, max_tokens: int = 2048, tokenizer_name: str = "gpt2") -> List[str]:
-#     """Split a long text into token chunks of size <= max_tokens."""
-#     tokenizer = AutoTokenizer.from_pretrained(tokenizer_name, use_fast=True)
-#     input_ids = tokenizer.encode(text)
+def chunk_text(text: str, tokenizer: PreTrainedTokenizer, max_tokens: int = 1024, concat_factor: int = 1) -> List[str]:
+    """
+    Splits a long text into token-based chunks, optionally concatenating them.
 
-#     # Break input_ids into chunks
-#     chunks = [input_ids[i:i + max_tokens] for i in range(0, len(input_ids), max_tokens)]
+    This function first tokenizes the entire input text and then divides the resulting
+    token IDs into segments, each containing up to `max_tokens`. These token segments
+    are then decoded back into strings. Optionally, these initial text chunks can be
+    further concatenated in groups determined by `concat_factor`.
 
-#     # Decode chunks back to text
-#     text_chunks = [tokenizer.decode(chunk, skip_special_tokens=True) for chunk in chunks]
-#     return text_chunks
+    Args:
+        text (str): The input text to be chunked.
+        tokenizer (PreTrainedTokenizer): The tokenizer instance (e.g., from transformers library
+                                        like `GPT2Tokenizer` or `AutoTokenizer.from_pretrained(...)`).
+                                        It should have `encode` and `decode` methods.
+        max_tokens (int): The maximum number of tokens allowed per initial chunk.
+                          Note: The final chunk might be shorter.
+        concat_factor (int): If > 1, initially created chunks will be concatenated
+                             in groups of this factor. For example, if `concat_factor` is 2,
+                             every two initial `max_tokens` chunks will be joined into one larger chunk.
+                             If `concat_factor` is 1, no additional concatenation occurs beyond
+                             the initial token-based splitting.
 
-# import re
+    Returns:
+        List[str]: A list of text chunks. Each chunk will approximately respect the
+                   `max_tokens` limit (or `max_tokens * concat_factor` if concatenation occurs),
+                   though actual word counts may vary.
+    """
+    # Optimize Token Accumulation: Encode the entire text once to get token IDs.
+    # Using add_special_tokens=False to prevent the tokenizer from adding
+    # BOS/EOS tokens, which are usually handled at the model input level
+    # and might skew chunking token counts.
+    input_ids = tokenizer.encode(text, add_special_tokens=False)
 
-# def chunk_text(text, max_words=500):
-#     """
-#     Splits text into chunks of max_words words each,
-#     attempting to split at sentence boundaries.
+    # Split these input_ids directly into chunks. This handles robustly cases
+    # like very long "words" or sequences that cross traditional word boundaries.
+    token_id_chunks = [input_ids[i:i + max_tokens] for i in range(0, len(input_ids), max_tokens)]
 
-#     Args:
-#         text (str): The full input text.
-#         max_words (int): Maximum words per chunk.
+    # Decode token ID chunks back into text strings.
+    # skip_special_tokens=True ensures that any special tokens (like [CLS], [SEP])
+    # are removed during decoding, producing clean text.
+    decoded_chunks = [tokenizer.decode(chunk_ids, skip_special_tokens=True) for chunk_ids in token_id_chunks]
 
-#     Returns:
-#         List[str]: List of text chunks.
-#     """
-
-#     # Split the text into sentences using punctuation marks as delimiters
-#     sentences = re.split(r'(?<=[.!?])\s+', text.strip())
-
-#     chunks = []
-#     current_chunk = []
-
-#     current_word_count = 0
-
-#     for sentence in sentences:
-#         sentence_word_count = len(sentence.split())
-
-#         # If adding this sentence exceeds max_words, finalize current chunk
-#         if current_word_count + sentence_word_count > max_words:
-#             # Join sentences to form a chunk
-#             chunks.append(" ".join(current_chunk))
-#             current_chunk = []
-#             current_word_count = 0
-
-#         # Add current sentence to chunk
-#         current_chunk.append(sentence)
-#         current_word_count += sentence_word_count
-
-#     # Add the last chunk if any sentences remain
-#     if current_chunk:
-#         chunks.append(" ".join(current_chunk))
-
-#     return chunks
-
-# easycontext_cpu/chunk.py
-
-from transformers import GPT2Tokenizer
-
-tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-
-def chunk_text(text, max_tokens=1024,concat_chunks=False,concat_factor=2):
-    words = text.split()
-    chunks = []
-    current_chunk = []
-
-    for word in words:
-        current_chunk.append(word)
-        tokens = tokenizer.encode(" ".join(current_chunk))
-        if len(tokens) > max_tokens:
-            current_chunk.pop()  # Remove last word to keep under limit
-            chunks.append(" ".join(current_chunk))
-            current_chunk = [word]
-
-    if current_chunk:
-        chunks.append(" ".join(current_chunk))
-
-    if concat_chunks and concat_factor > 1:
-        return [" ".join(chunks[i:i+concat_factor])
-                for i in range(0, len(chunks), concat_factor)]
-    return chunks
-
-
+    # Simplify concat_chunks Logic:
+    # If concat_factor is greater than 1, concatenate the initially decoded chunks.
+    if concat_factor > 1:
+        concatenated_final_chunks = []
+        for i in range(0, len(decoded_chunks), concat_factor):
+            # Join `concat_factor` number of decoded chunks into a single string.
+            # Using " " as a separator, which is common for text concatenation.
+            concatenated_final_chunks.append(" ".join(decoded_chunks[i:i+concat_factor]))
+        return concatenated_final_chunks
+    else:
+        # If concat_factor is 1 (or less), return the initial decoded chunks without further concatenation.
+        return decoded_chunks
