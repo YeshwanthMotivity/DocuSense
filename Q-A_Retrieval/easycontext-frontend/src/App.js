@@ -1,203 +1,107 @@
-import React, { useState } from "react";
+import React, { useReducer, useCallback } from "react";
+import styles from "./App.module.css";
+import useApiQuery from "./useApiQuery";
+import DocumentUploadForm from "./DocumentUploadForm";
+import QueryResultDisplay from "./QueryResultDisplay";
 
-const styles = {
-  container: {
-    maxWidth: 700,
-    margin: "40px auto",
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    backgroundColor: "#f9fafb",
-    borderRadius: 8,
-    padding: 30,
-    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-  },
-  heading: {
-    textAlign: "center",
-    color: "#2c3e50",
-    marginBottom: 30,
-    fontWeight: "700",
-  },
-  formGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    display: "block",
-    fontWeight: "600",
-    marginBottom: 8,
-    color: "#34495e",
-  },
-  fileInput: {
-    padding: "8px 12px",
-    borderRadius: 5,
-    border: "1px solid #ccc",
-    width: "100%",
-    boxSizing: "border-box",
-  },
-  textInput: {
-    width: "100%",
-    padding: "10px 12px",
-    borderRadius: 5,
-    border: "1px solid #ccc",
-    fontSize: 16,
-    boxSizing: "border-box",
-  },
-  button: {
-    width: "100%",
-    padding: "12px",
-    borderRadius: 5,
-    border: "none",
-    backgroundColor: "#3498db",
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-    cursor: "pointer",
-    transition: "background-color 0.3s ease",
-  },
-  buttonDisabled: {
-    backgroundColor: "#95a5a6",
-    cursor: "not-allowed",
-  },
-  errorText: {
-    color: "#e74c3c",
-    fontWeight: "600",
-    marginTop: 10,
-  },
-  resultContainer: {
-    marginTop: 30,
-    padding: 20,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-  },
-  sectionTitle: {
-    color: "#2c3e50",
-    fontWeight: "700",
-    marginBottom: 10,
-  },
-  preformatted: {
-    whiteSpace: "pre-wrap",
-    backgroundColor: "#f0f3f7",
-    padding: 15,
-    borderRadius: 6,
-    fontSize: 14,
-    lineHeight: 1.5,
-    color: "#34495e",
-  },
+const initialAppState = {
+  file: null,
+  question: "",
+  answer: null,
+  prompt: null,
+  debugInfo: null,
+  localError: null, // For validation errors before API call
 };
 
+function appReducer(state, action) {
+  switch (action.type) {
+    case "SET_FILE":
+      return { ...state, file: action.payload, localError: null };
+    case "SET_QUESTION":
+      return { ...state, question: action.payload, localError: null };
+    case "SET_API_RESULT":
+      return {
+        ...state,
+        answer: action.payload.answer,
+        prompt: action.payload.prompt,
+        debugInfo: action.payload.debug_info,
+        localError: null,
+      };
+    case "SET_LOCAL_ERROR":
+      return { ...state, localError: action.payload };
+    case "RESET_RESULTS":
+      return { ...state, answer: null, prompt: null, debugInfo: null, localError: null };
+    default:
+      return state;
+  }
+}
+
 function App() {
-  const [file, setFile] = useState(null);
-  const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState(null);
-  const [prompt, setPrompt] = useState(null);
-  const [debugInfo, setDebugInfo] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [state, dispatch] = useReducer(appReducer, initialAppState);
+  const { file, question, answer, prompt, debugInfo, localError } = state;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setAnswer(null);
-    setPrompt(null);
-    setDebugInfo(null);
+  const {
+    execute: executeApiQuery,
+    loading: apiLoading,
+    error: apiError,
+    reset: resetApiQuery,
+  } = useApiQuery("http://127.0.0.1:5000/", "POST");
 
-    if (!file || !question) {
-      setError("Please upload a file and enter a question.");
-      return;
-    }
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+      dispatch({ type: "RESET_RESULTS" }); // Clear previous results and local error
+      resetApiQuery(); // Clear previous API errors and data
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("question", question);
-
-    setLoading(true);
-
-    try {
-      const response = await fetch("http://127.0.0.1:5000/", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.statusText}`);
+      if (!file || !question.trim()) {
+        dispatch({
+          type: "SET_LOCAL_ERROR",
+          payload: "Please upload a file and enter a question.",
+        });
+        return;
       }
 
-      const data = await response.json();
-      if (data.error) {
-        setError(data.error);
-      } else {
-        setAnswer(data.answer);
-        setPrompt(data.prompt);
-        setDebugInfo(data.debug_info);
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("question", question);
+
+      try {
+        const data = await executeApiQuery(formData);
+        dispatch({ type: "SET_API_RESULT", payload: data });
+      } catch (err) {
+        // API error is handled by useApiQuery hook, its error state will update.
+        // No need to dispatch a local error here as apiError will reflect it.
       }
-    } catch (err) {
-      setError("Failed to fetch answer: " + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [file, question, executeApiQuery, resetApiQuery]
+  );
+
+  const handleFileChange = useCallback((e) => {
+    dispatch({ type: "SET_FILE", payload: e.target.files[0] });
+  }, []);
+
+  const handleQuestionChange = useCallback((e) => {
+    dispatch({ type: "SET_QUESTION", payload: e.target.value });
+  }, []);
+
+  const currentError = localError || apiError;
+  const isLoading = apiLoading;
 
   return (
-     <div style={styles.container}>
-      <h1 style={styles.heading}>Ask a Question from Your Document</h1>
+    <div className={styles.container} aria-busy={isLoading ? "true" : "false"}>
+      <h1 className={styles.heading}>Ask a Question from Your Document</h1>
 
-      <form onSubmit={handleSubmit}>
-        <div style={styles.formGroup}>
-          <label htmlFor="file" style={styles.label}>
-            Upload a text file:
-          </label>
-          <input
-            id="file"
-            type="file"
-            accept=".txt"
-            style={styles.fileInput}
-            onChange={(e) => setFile(e.target.files[0])}
-            disabled={loading}
-            required
-          />
-        </div>
+      <DocumentUploadForm
+        file={file}
+        question={question}
+        onFileChange={handleFileChange}
+        onQuestionChange={handleQuestionChange}
+        onSubmit={handleSubmit}
+        loading={isLoading}
+        error={currentError} // Pass combined error
+      />
 
-        <div style={styles.formGroup}>
-          <label htmlFor="question" style={styles.label}>
-            Enter your question:
-          </label>
-          <input
-            id="question"
-            type="text"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            placeholder="Type your question here..."
-            style={styles.textInput}
-            disabled={loading}
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            ...styles.button,
-            ...(loading ? styles.buttonDisabled : {}),
-          }}
-        >
-          {loading ? "Asking..." : "Ask"}
-        </button>
-      </form>
-
-      {error && <p style={styles.errorText}>{error}</p>}
-
-      {answer && (
-        <div style={styles.resultContainer}>
-          <h2 style={styles.sectionTitle}>Answer:</h2>
-          <p>{answer}</p>
-
-          <h3 style={styles.sectionTitle}>Prompt Used:</h3>
-          <pre style={styles.preformatted}>{prompt}</pre>
-
-          <h3 style={styles.sectionTitle}>Raw Output (Debug):</h3>
-          <pre style={styles.preformatted}>{debugInfo}</pre>
-        </div>
-      )}
+      <QueryResultDisplay answer={answer} prompt={prompt} debugInfo={debugInfo} />
     </div>
   );
 }
