@@ -1,88 +1,36 @@
-# utils/chunk_codebase.py
-
-from transformers import AutoTokenizer
 from typing import List
+from transformers import PreTrainedTokenizerBase
 
-# def chunk_text(text: str, max_tokens: int = 2048, tokenizer_name: str = "gpt2") -> List[str]:
-#     """Split a long text into token chunks of size <= max_tokens."""
-#     tokenizer = AutoTokenizer.from_pretrained(tokenizer_name, use_fast=True)
-#     input_ids = tokenizer.encode(text)
+def chunk_text(text: str, tokenizer: PreTrainedTokenizerBase, max_tokens: int = 1024) -> List[str]:
+    """
+    Splits a long text into token-based chunks, ensuring each chunk does not exceed
+    a specified maximum token limit.
 
-#     # Break input_ids into chunks
-#     chunks = [input_ids[i:i + max_tokens] for i in range(0, len(input_ids), max_tokens)]
+    This function first tokenizes the entire input text into a list of token IDs.
+    It then iterates through these token IDs, creating sub-lists (chunks of token IDs)
+    each adhering to the `max_tokens` limit. Finally, these token ID chunks are
+    decoded back into readable text strings.
 
-#     # Decode chunks back to text
-#     text_chunks = [tokenizer.decode(chunk, skip_special_tokens=True) for chunk in chunks]
-#     return text_chunks
+    Args:
+        text (str): The full input text to be chunked.
+        tokenizer (PreTrainedTokenizerBase): An instantiated tokenizer object
+            (e.g., from `transformers.AutoTokenizer.from_pretrained` or `transformers.GPT2Tokenizer`).
+            This improves modularity, testability, and allows for using different tokenizers.
+        max_tokens (int): The maximum number of tokens allowed per chunk.
+            Defaults to 1024.
 
-# import re
+    Returns:
+        List[str]: A list of text strings, where each string is a chunk
+            and its token count is less than or equal to `max_tokens`.
+    """
+    # Optimize tokenization: encode the entire input text into token IDs once.
+    input_ids = tokenizer.encode(text)
 
-# def chunk_text(text, max_words=500):
-#     """
-#     Splits text into chunks of max_words words each,
-#     attempting to split at sentence boundaries.
+    # Split token IDs into sub-lists (chunks) that adhere to max_tokens
+    chunks_of_ids = [input_ids[i : i + max_tokens] for i in range(0, len(input_ids), max_tokens)]
 
-#     Args:
-#         text (str): The full input text.
-#         max_words (int): Maximum words per chunk.
+    # Decode the token ID sub-lists back into text
+    # skip_special_tokens=True is generally desired for content chunks
+    text_chunks = [tokenizer.decode(chunk_ids, skip_special_tokens=True) for chunk_ids in chunks_of_ids]
 
-#     Returns:
-#         List[str]: List of text chunks.
-#     """
-
-#     # Split the text into sentences using punctuation marks as delimiters
-#     sentences = re.split(r'(?<=[.!?])\s+', text.strip())
-
-#     chunks = []
-#     current_chunk = []
-
-#     current_word_count = 0
-
-#     for sentence in sentences:
-#         sentence_word_count = len(sentence.split())
-
-#         # If adding this sentence exceeds max_words, finalize current chunk
-#         if current_word_count + sentence_word_count > max_words:
-#             # Join sentences to form a chunk
-#             chunks.append(" ".join(current_chunk))
-#             current_chunk = []
-#             current_word_count = 0
-
-#         # Add current sentence to chunk
-#         current_chunk.append(sentence)
-#         current_word_count += sentence_word_count
-
-#     # Add the last chunk if any sentences remain
-#     if current_chunk:
-#         chunks.append(" ".join(current_chunk))
-
-#     return chunks
-
-# easycontext_cpu/chunk.py
-
-from transformers import GPT2Tokenizer
-
-tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-
-def chunk_text(text, max_tokens=1024,concat_chunks=False,concat_factor=2):
-    words = text.split()
-    chunks = []
-    current_chunk = []
-
-    for word in words:
-        current_chunk.append(word)
-        tokens = tokenizer.encode(" ".join(current_chunk))
-        if len(tokens) > max_tokens:
-            current_chunk.pop()  # Remove last word to keep under limit
-            chunks.append(" ".join(current_chunk))
-            current_chunk = [word]
-
-    if current_chunk:
-        chunks.append(" ".join(current_chunk))
-
-    if concat_chunks and concat_factor > 1:
-        return [" ".join(chunks[i:i+concat_factor])
-                for i in range(0, len(chunks), concat_factor)]
-    return chunks
-
-
+    return text_chunks
