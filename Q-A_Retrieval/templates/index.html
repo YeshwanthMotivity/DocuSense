@@ -1,17 +1,25 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EasyContext QA</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <h1>Ask a Question from Your Document</h1>
-    <form method="post" enctype="multipart/form-data">
-        <p>Upload a text file:</p>
-        <input type="file" name="file" required>
-        <p>Enter your question:</p>
-        <input type="text" name="question" required>
-        <br><br>
+    <form method="post" enctype="multipart/form-data" id="qaForm">
+        <p>
+            <label for="fileUpload">Upload a text file:</label><br>
+            <input type="file" name="file" id="fileUpload" required>
+            <span class="error-message" id="fileError"></span>
+        </p>
+        <p>
+            <label for="questionInput">Enter your question:</label><br>
+            <input type="text" name="question" id="questionInput" required>
+            <span class="error-message" id="questionError"></span>
+        </p>
+        <br>
         <input type="submit" value="Ask">
     </form>
 
@@ -20,8 +28,66 @@
         <p>{{ answer }}</p>
         <h3>Prompt Used:</h3>
         <pre>{{ prompt }}</pre>
-        <h3>Raw Output (Debug):</h3>
-        <pre>{{ debug_info }}</pre>
+        <button id="toggleDebug">Show Raw Output (Debug)</button>
+        <div id="debugOutput" style="display: none;">
+            <h3>Raw Output (Debug):</h3>
+            <pre>{{ debug_info }}</pre>
+        </div>
     {% endif %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Client-side form validation
+            const qaForm = document.getElementById('qaForm');
+            const fileInput = document.getElementById('fileUpload');
+            const questionInput = document.getElementById('questionInput');
+            const fileError = document.getElementById('fileError');
+            const questionError = document.getElementById('questionError');
+
+            if (qaForm) {
+                qaForm.addEventListener('submit', function(event) {
+                    let isValid = true;
+
+                    // Reset errors
+                    if (fileError) fileError.textContent = '';
+                    if (questionError) questionError.textContent = '';
+                    if (fileInput) fileInput.classList.remove('error');
+                    if (questionInput) questionInput.classList.remove('error');
+
+                    if (fileInput && fileInput.value.trim() === '') {
+                        if (fileError) fileError.textContent = 'Please select a file to upload.';
+                        if (fileInput) fileInput.classList.add('error');
+                        isValid = false;
+                    }
+
+                    if (questionInput && questionInput.value.trim() === '') {
+                        if (questionError) questionError.textContent = 'Please enter your question.';
+                        if (questionInput) questionInput.classList.add('error');
+                        isValid = false;
+                    }
+
+                    if (!isValid) {
+                        event.preventDefault(); // Prevent form submission if validation fails
+                    }
+                });
+            }
+
+            // Debug output toggle
+            const toggleDebugButton = document.getElementById('toggleDebug');
+            const debugOutputDiv = document.getElementById('debugOutput');
+
+            if (toggleDebugButton && debugOutputDiv) {
+                toggleDebugButton.addEventListener('click', function() {
+                    if (debugOutputDiv.style.display === 'none') {
+                        debugOutputDiv.style.display = 'block';
+                        toggleDebugButton.textContent = 'Hide Raw Output (Debug)';
+                    } else {
+                        debugOutputDiv.style.display = 'none';
+                        toggleDebugButton.textContent = 'Show Raw Output (Debug)';
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
