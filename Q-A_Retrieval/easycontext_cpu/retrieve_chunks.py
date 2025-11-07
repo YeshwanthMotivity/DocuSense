@@ -1,24 +1,45 @@
-# utils/retrieve_chunks.py
-
 from sentence_transformers import SentenceTransformer, util
 
-# Load a small sentence embedding model (CPU-compatible)
-retriever = SentenceTransformer("all-MiniLM-L6-v2")  # 80MB model
+class ChunkRetriever:
+    def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
+        """
+        Initializes the ChunkRetriever with a SentenceTransformer model.
 
-def get_top_k_chunks(query, chunk_texts, k=3):
-    """
-    Returns top-k most relevant text chunks for a given query using cosine similarity.
-    """
-    # Embed the query and all chunks
-    query_embedding = retriever.encode(query, convert_to_tensor=True)
-    chunk_embeddings = retriever.encode(chunk_texts, convert_to_tensor=True)
+        Args:
+            model_name: The name of the SentenceTransformer model to load.
+        """
+        self.retriever = SentenceTransformer(model_name)
 
-    # Compute cosine similarity
-    similarities = util.cos_sim(query_embedding, chunk_embeddings)[0]
+    def get_top_k_chunks(self, query: str, chunk_texts: list[str], k: int = 3) -> list[str]:
+        """
+        Returns top-k most relevant text chunks for a given query using cosine similarity.
 
-    # Get top-k chunk indices
-    top_k_indices = similarities.argsort(descending=True)[:k]
+        Args:
+            query: The query string.
+            chunk_texts: A list of text chunks to search within.
+            k: The number of top chunks to retrieve.
 
-    # Return top-k matching chunks
-    top_chunks = [chunk_texts[i] for i in top_k_indices]
-    return top_chunks
+        Returns:
+            A list of the top-k most relevant text chunks.
+
+        Raises:
+            ValueError: If k is not a positive integer.
+        """
+        if not isinstance(k, int) or k <= 0:
+            raise ValueError("k must be a positive integer.")
+
+        if not chunk_texts:
+            return []
+
+        # Cap k if it's greater than the number of available chunks
+        k = min(k, len(chunk_texts))
+
+        query_embedding = self.retriever.encode(query, convert_to_tensor=True)
+        chunk_embeddings = self.retriever.encode(chunk_texts, convert_to_tensor=True)
+
+        similarities = util.cos_sim(query_embedding, chunk_embeddings)[0]
+
+        top_k_indices = similarities.argsort(descending=True)[:k]
+
+        top_chunks = [chunk_texts[i] for i in top_k_indices]
+        return top_chunks
