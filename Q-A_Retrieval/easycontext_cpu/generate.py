@@ -1,9 +1,10 @@
-# generate.py
-
-from easycontext_cpu.utils import load_file
+import logging
 from easycontext_cpu.chunk import chunk_text
 from easycontext_cpu.retrieve_chunks import get_top_k_chunks
 from easycontext_cpu.infer_model import generate_answer
+
+# Configure basic logging for the module
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def run_easycontext_pipeline(text, query, k=5):
     """
@@ -12,13 +13,29 @@ def run_easycontext_pipeline(text, query, k=5):
     - Retrieves the top-k relevant chunks
     - Generates an answer using the selected chunks
     """
-    print("🧩 Chunking input text...")
-    chunks = chunk_text(text)
+    chunks = None
+    top_chunks = None
+    answer = None
 
-    print(f"🔍 Retrieving top-{k} relevant chunks...")
-    top_chunks = get_top_k_chunks(chunks, query, k=k)
+    try:
+        logging.info("🧩 Chunking input text...")
+        chunks = chunk_text(text)
+    except Exception as e:
+        logging.error(f"Failed to chunk text: {e}")
+        return None
 
-    print("🧠 Generating answer from selected chunks...")
-    answer = generate_answer(query, top_chunks)
+    try:
+        logging.info(f"🔍 Retrieving top-{k} relevant chunks...")
+        top_chunks = get_top_k_chunks(chunks, query, k=k)
+    except Exception as e:
+        logging.error(f"Failed to retrieve top-k chunks: {e}")
+        return None
+
+    try:
+        logging.info("🧠 Generating answer from selected chunks...")
+        answer = generate_answer(query, top_chunks)
+    except Exception as e:
+        logging.error(f"Failed to generate answer: {e}")
+        return None
 
     return answer
