@@ -1,31 +1,41 @@
+:root {
+  --primary-background: #282c34;
+  --accent-color: #61dafb;
+  --logo-animation-duration: 20s;
+  --min-height-full-viewport: 100vh;
+  --base-font-size-px: 10px;
+  --base-font-size-vmin: 2vmin;
+  --logo-height: 40vmin;
+}
+
 .App {
   text-align: center;
 }
 
 .App-logo {
-  height: 40vmin;
+  height: var(--logo-height);
   pointer-events: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+    animation: App-logo-spin infinite var(--logo-animation-duration) linear;
   }
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+  background-color: var(--primary-background);
+  min-height: var(--min-height-full-viewport);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  font-size: calc(var(--base-font-size-px) + var(--base-font-size-vmin));
   color: white;
 }
 
 .App-link {
-  color: #61dafb;
+  color: var(--accent-color);
 }
 
 @keyframes App-logo-spin {
