@@ -1,17 +1,90 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
 <html>
 <head>
     <title>EasyContext QA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+        }
+        h2, h3 {
+            color: #34495e;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        form {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 500px;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="file"],
+        input[type="text"] {
+            width: calc(100% - 22px); /* Account for padding and border */
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        input[type="submit"] {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+        input[type="submit"]:hover {
+            background-color: #2980b9;
+        }
+        pre {
+            background-color: #e8e8e8;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            border: 1px solid #ddd;
+        }
+        p {
+            line-height: 1.6;
+        }
+    </style>
 </head>
 <body>
     <h1>Ask a Question from Your Document</h1>
     <form method="post" enctype="multipart/form-data">
-        <p>Upload a text file:</p>
-        <input type="file" name="file" required>
-        <p>Enter your question:</p>
-        <input type="text" name="question" required>
-        <br><br>
+        <div class="form-group">
+            <label for="file_upload">Upload a text file:</label>
+            <input type="file" id="file_upload" name="file" required>
+        </div>
+        <div class="form-group">
+            <label for="question_input">Enter your question:</label>
+            <input type="text" id="question_input" name="question" required>
+        </div>
         <input type="submit" value="Ask">
     </form>
 
@@ -20,8 +93,10 @@
         <p>{{ answer }}</p>
         <h3>Prompt Used:</h3>
         <pre>{{ prompt }}</pre>
-        <h3>Raw Output (Debug):</h3>
-        <pre>{{ debug_info }}</pre>
+        {% if debug_mode %}
+            <h3>Raw Output (Debug):</h3>
+            <pre>{{ debug_info }}</pre>
+        {% endif %}
     {% endif %}
 </body>
 </html>
