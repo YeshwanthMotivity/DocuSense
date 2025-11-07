@@ -1,38 +1,48 @@
+:root {
+  --primary-background: #282c34; /* Primary background color for the header */
+  --text-color: white; /* Default text color */
+  --link-color: #61dafb; /* Color for application links */
+  --logo-animation-duration: 20s; /* Duration for the logo spin animation */
+}
+
 .App {
   text-align: center;
 }
 
 .App-logo {
-  height: 40vmin;
-  pointer-events: none;
+  height: 40vmin; /* Sets the logo height relative to the viewport's smaller dimension */
+  pointer-events: none; /* Prevents the logo from being a target for mouse events */
 }
 
+/* Apply animation only if the user has no preference for reduced motion */
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+    /* Spins the logo infinitely at a constant speed */
+    animation: App-logo-spin infinite var(--logo-animation-duration) linear;
   }
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  background-color: var(--primary-background); /* Sets the background color using a custom property */
+  min-height: 100vh; /* Ensures the header takes at least the full viewport height */
+  display: flex; /* Enables flexbox layout */
+  flex-direction: column; /* Arranges items vertically */
+  align-items: center; /* Centers items horizontally */
+  justify-content: center; /* Centers items vertically */
+  font-size: calc(10px + 2vmin); /* Responsive font size */
+  color: var(--text-color); /* Sets text color using a custom property */
 }
 
 .App-link {
-  color: #61dafb;
+  color: var(--link-color); /* Sets link color using a custom property */
 }
 
+/* Keyframe animation for the logo spin */
 @keyframes App-logo-spin {
   from {
-    transform: rotate(0deg);
+    transform: rotate(0deg); /* Starting rotation angle */
   }
   to {
-    transform: rotate(360deg);
+    transform: rotate(360deg); /* Ending rotation angle (full circle) */
   }
 }
