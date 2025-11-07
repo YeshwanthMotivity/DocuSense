@@ -1,5 +1,3 @@
-# rerank.py
-
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -15,6 +13,9 @@ def rerank_chunks(chunks, query, top_k=5):
     Returns:
         List[str]: Top-k ranked chunks by similarity.
     """
+    if not isinstance(top_k, int) or top_k < 0:
+        raise ValueError("top_k must be a non-negative integer.")
+
     if not chunks:
         return []
 
