@@ -3,7 +3,7 @@ DocuSense is an intelligent document question-answering system that allows users
 
 ---
 
-### 🚀 Features
+### Features
 • **Intelligent PDF Reading**: Upload PDF documents to enable an intelligent Q&A session.
 
 • **Semantic Search**: Utilizes SentenceTransformers and FAISS for fast and accurate semantic search.
@@ -15,7 +15,7 @@ DocuSense is an intelligent document question-answering system that allows users
 • **Scalable Backend**: The Flask backend handles all the logic for embeddings, search, and LLM responses, and is easily extendable for cloud deployment.
 
 ---
-### 🛠️ Tech Stack
+### Tech Stack
 
 |     Layer      |                      Tools Used                      |
 | -------------- | ---------------------------------------------------- |
@@ -26,12 +26,12 @@ DocuSense is an intelligent document question-answering system that allows users
 | **Deployment** | `Flask API` (local, extendable to Render/Heroku)     |
 
 ---
-### 📸 Architecture Diagram
+### Architecture Diagram
 <img width="877" height="663" alt="arc" src="https://github.com/user-attachments/assets/b868e97d-8662-413e-90b7-4caeae6a9e27" />
 
 ---
 
-### 📄 Project Workflow
+### Project Workflow
 
 1. **Document Upload**: A user uploads a PDF file via the React UI.
 2. **Text Extraction**: The Flask backend parses and chunks the PDF's content using PyMuPDF.
@@ -41,7 +41,7 @@ DocuSense is an intelligent document question-answering system that allows users
 6. **Response**: The answer is sent back to the frontend and displayed to the user in real-time.
 
 ---
-### 📂 Project Structure 
+### Project Structure 
 
 ```
 DocuSense/
@@ -57,7 +57,7 @@ DocuSense/
 └── README.md
 ```
 ---
-### 💻 Running Locally
+### Running Locally
 
 To get the project up and running on your local machine, follow these steps.
 
@@ -79,7 +79,7 @@ npm start
 ```
 ---
 
-### 🎯 Future Improvements
+### Future Improvements
 1. Expanded File Support: Add support for .docx and .txt file formats.
 2. Multi-Document Context: Allow users to upload multiple documents and maintain a single Q&A context across them.
 3. Authentication: Implement user authentication for handling private and secure documents.
@@ -87,7 +87,7 @@ npm start
 
 ---
 
-## 🙋‍♂️ Author
+## Author
 
 • Mentor / Manager: Mr. Venkata Ramana Sudhakar Polavarapu
 
@@ -97,7 +97,7 @@ npm start
 
 ---
 
-## 📬 Contact
+## Contact
 For any questions or collaboration, feel free to reach out:
 
 Email: yeshwanth.mudimala@motivitylabs.com
