@@ -82,7 +82,6 @@ Start the React app:
 ```bash
 npm start
 ```
-*App runs on http://localhost:3000*
 ---
 
 ## Usage
