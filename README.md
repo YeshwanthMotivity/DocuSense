@@ -1,18 +1,17 @@
-### DocuSense: Document-Based Q&A Retrieval System
-DocuSense is an intelligent document question-answering system that allows users to upload a PDF, ask questions in natural language, and receive context-aware answers. It leverages semantic search and large language models (LLMs) to extract relevant information from unstructured documents efficiently.
+# DocuSense AI
 
----
+**DocuSense** is an intelligent, document-based Q&A system that allows you to chat with your files (PDF, DOCX, TXT) using advanced local LLMs. It features a modern chat interface, voice interaction, and conversation memory.
 
-### Features
-• **Intelligent PDF Reading**: Upload PDF documents to enable an intelligent Q&A session.
+## Features
 
-• **Semantic Search**: Utilizes SentenceTransformers and FAISS for fast and accurate semantic search.
-
-• **AI-Generated Answers**: Employs Hugging Face Transformers to provide context-aware answers derived directly from the document.
-
-• **Interactive UI**: A clean, responsive Q&A interface is built with React.js.
-
-• **Scalable Backend**: The Flask backend handles all the logic for embeddings, search, and LLM responses, and is easily extendable for cloud deployment.
+-   **📄 Multi-Format Support**: Upload and analyze **PDF**, **DOCX**, and **TXT** files.
+-   **🗣️ Voice Interaction**:
+    -   **Voice Input**: Speak your questions using the microphone button.
+    -   **Voice Output**: Listen to the AI's answers with the speaker button.
+-   **🧠 Conversation Memory**: Ask follow-up questions (e.g., "Summarize *it*") with context awareness.
+-   **🎨 Modern UI**: Beautiful, responsive "Glassmorphism" interface with Dark/Light accents.
+-   **🔒 Local Privacy**: Powered by **Ollama**, ensuring your documents stay on your machine.
+-   **Semantic Search**: Utilizes SentenceTransformers and FAISS for fast and accurate semantic search.
 
 ---
 ### Tech Stack
@@ -79,12 +78,12 @@ npm start
 ```
 ---
 
-### Future Improvements
-1. Expanded File Support: Add support for .docx and .txt file formats.
-2. Multi-Document Context: Allow users to upload multiple documents and maintain a single Q&A context across them.
-3. Authentication: Implement user authentication for handling private and secure documents.
-4. Dockerization: Containerize the application using Docker for a more seamless and portable deployment experience.
+## Usage
 
+1.  Open the frontend in your browser.
+2.  **Upload** a document (Drag & drop or Click).
+3.  **Type** or **Speak** your question.
+4.  View the answer and click **Show Debug Info** to see the underlying prompt.
 ---
 
 ## Author
