@@ -41,41 +41,48 @@
 
 ---
 ### Project Structure 
-
-```
+```bash
 DocuSense/
-├── backend/                  # Flask backend logic
-│   ├── app.py                # Main Flask application
-│   ├── embedding_utils.py    # FAISS and model logic
-│   └── requirements.txt      # Python dependencies
-├── frontend/                 # React frontend
-│   ├── src/
-│   │   └── components/
-│   │       └── UploadForm.js # File upload and Q&A UI
-│   └── package.json
-└── README.md
+├── Q-A_Retrieval/      # Backend (Flask) & Frontend code
+│   ├── app.py          # API Entry point
+│   ├── easycontext-frontend/ # React Application
+│   └── ...
 ```
----
-### Running Locally
 
-To get the project up and running on your local machine, follow these steps.
+## Installation & Usage
 
-### 1. Backend (Flask)
-Navigate to the backend directory, install the required dependencies, and start the Flask server.
-```
-cd backend
+### 1. Backend Setup
+
+ Navigate to the `Q-A_Retrieval` directory:
+
+```bash
+cd Q-A_Retrieval
 pip install -r requirements.txt
+```
+
+Start the Flask server:
+
+```bash
 python app.py
 ```
+*Server runs on http://127.0.0.1:5000*
 
-### 2. Frontend (React)
-Open a new terminal, navigate to the frontend directory, install the Node.js packages, and start the development server.
-```
-cd frontend
+### 2. Frontend Setup
+
+Navigate to the frontend directory:
+
+```bash
+cd Q-A_Retrieval/easycontext-frontend
 npm install
-npm start
-
+npm install lucide-react # If not already installed
 ```
+
+Start the React app:
+
+```bash
+npm start
+```
+*App runs on http://localhost:3000*
 ---
 
 ## Usage
